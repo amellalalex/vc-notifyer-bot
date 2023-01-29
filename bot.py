@@ -1,14 +1,11 @@
 import discord
 import os
 import time
-from dotenv import load_dotenv
 
 timeOfPreviousNotification = 0
 
 intents = discord.Intents(messages=True, message_content=True, voice_states=True)
 client = discord.Client(intents=discord.Intents.all())
-
-load_dotenv()
 
 @client.event
 async def on_read():
