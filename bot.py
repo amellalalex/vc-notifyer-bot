@@ -1,9 +1,14 @@
 import discord
 import os
 import time
+from dotenv import load_dotenv
+
+timeOfPreviousNotification = 0
 
 intents = discord.Intents(messages=True, message_content=True, voice_states=True)
 client = discord.Client(intents=discord.Intents.all())
+
+load_dotenv()
 
 @client.event
 async def on_read():
@@ -22,11 +27,17 @@ async def on_message(message):
 
 @client.event
 async def on_voice_state_update(member, before, after):
-    if before.channel == None and after.channel != None:
+    # Conditions
+    notPreviouslyInChannel = before.channel == None and after.channel != None
+    firstInChannel = len(after.channel.members) == 1
+    coolDownElapsed = time.time() - timeOfPreviousNotification >= 300
+
+    if notPreviouslyInChannel and firstInChannel and coolDownElapsed:
         channel = client.get_channel(850843483781464087)
         jumpurl = after.channel.jump_url
         await channel.send(member.display_name + ' has just joined the ' + after.channel.name + ' channel')
         await channel.send(jumpurl)
         print(member.display_name + ' has just joined the ' + after.channel.name)
+        timeOfPreviousNotification = time.time()
 
-client.run('MTA2ODMxMDUzNDM2NzIxNTY2Nw.Gby1eb.PnCqDmVzDlLTpPnzAFcawsc8k25-QYxQhEGENs')
+client.run(os.getenv('TOKEN'))
